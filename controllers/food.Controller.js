@@ -21,7 +21,7 @@ const addFood = async (req, res) => {
             .json(new ApiResponse(200, food, "Food added successfully"))
     } catch (error) {
         return res
-            .json(new ApiError(401, "", "Failed to add food in DB"));
+            .json(new ApiError(401, "", "Failed to add food"));
     }
 }
 
