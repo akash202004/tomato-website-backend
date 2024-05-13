@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB } from './config/db.js';
 import foodRouter from './routes/food.Route.js';
+import userRouter from './routes/user.Route.js';
+
 
 // dotnev config
 dotenv.config()
@@ -21,7 +23,8 @@ connectDB();
 
 // api endpoint
 app.use('/api/food', foodRouter);
-app.use("/images", express.static('uploads'))
+app.use("/images", express.static('uploads'));
+app.use("/api/user", userRouter)
 
 app.get("/", (req, res) => {
     res.send("Akash Laha");
