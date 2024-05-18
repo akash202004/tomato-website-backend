@@ -3,7 +3,9 @@ import { userModel } from "../models/user.Model.js";
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import Stripe from 'stripe';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Placing user order from frontend
@@ -18,7 +20,7 @@ const placeOrder = async (req, res) => {
             address: req.body.address
         })
         await newOrder.save();
-        await userModel.findOneAndUpdate(req.body.userId, { cartData: {} });
+        await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
 
         const line_items = req.body.items.map((item) => ({
             price_data: {
@@ -43,6 +45,7 @@ const placeOrder = async (req, res) => {
         })
 
         const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
             line_items: line_items,
             mode: 'payment',
             success_url: `${frontend_url}/verify?success=true&orderId=${newOrder._id}`,
@@ -51,7 +54,8 @@ const placeOrder = async (req, res) => {
 
         return res
             .status(200)
-            .json(new ApiResponse(200, session, "Order placed successfully"))
+            .json(new ApiResponse(200, { session_url: session.url }, "Order placed successfully"))
+
     } catch (error) {
         console.log("placeOrder error", error);
         return res
@@ -60,4 +64,36 @@ const placeOrder = async (req, res) => {
     }
 }
 
-export { placeOrder }
+// Verifying user order from frontend
+const verifyOrder = async (req, res) => {
+    const { orderId, success } = req.body;
+    try {
+        if (success == "true") {
+            await orderModel.findByIdAndUpdate(orderId, { payment: "true" });
+            res
+                .status(200)
+                .json(new ApiResponse(200, "", "Payment successful"));
+        } else {
+            await orderModel.findByIdAndDelete(orderId);
+            res
+                .status(401)
+                .json(new ApiError(401, "", "Payment failed"));
+        }
+    } catch (error) {
+        console.log("verifyOrder error", error);
+        return res
+            .status(401)
+            .json(new ApiError(401, "", "Failed to verify order"));
+    }
+}
+
+// users order for frontend
+const userOrders = async (req, res) => {
+    try {
+        const orders
+    } catch (error) {
+
+    }
+}
+
+export { placeOrder, verifyOrder, userOrders }
