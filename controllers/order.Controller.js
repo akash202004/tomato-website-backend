@@ -90,9 +90,15 @@ const verifyOrder = async (req, res) => {
 // users order for frontend
 const userOrders = async (req, res) => {
     try {
-        const orders
+        const orders = await orderModel.find({ userId: req.body.userId });
+        return res
+            .status(200)
+            .json(new ApiResponse(200, orders, "User orders fetched successfully"));
     } catch (error) {
-
+        console.log("userOrders error", error);
+        return res
+            .status(401)
+            .json(new ApiError(401, "", "Failed to fetch user orders"));
     }
 }
 
