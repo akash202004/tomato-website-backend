@@ -102,4 +102,23 @@ const userOrders = async (req, res) => {
     }
 }
 
-export { placeOrder, verifyOrder, userOrders }
+// lisitng all orders for admin
+const listOrders = async (req, res) => {
+    try {
+        const orders = await orderModel.find({});
+        return res
+            .status(200)
+            .json(new ApiResponse(200, orders, "Orders fetched successfully"));
+    } catch (error) {
+        console.log("listOrders error", error);
+        return res
+            .status(401)
+            .json(new ApiError(401, "", "Failed to fetch orders"));
+    }
+}
+
+// updating order status for admin
+const updateStatus = async (req, res) => {
+}
+
+export { placeOrder, verifyOrder, userOrders, listOrders, updateStatus }
