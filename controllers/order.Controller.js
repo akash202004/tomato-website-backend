@@ -119,6 +119,17 @@ const listOrders = async (req, res) => {
 
 // updating order status for admin
 const updateStatus = async (req, res) => {
+    try {
+        await orderModel.findByIdAndUpdate(req.body.orderId, { status: req.body.status });
+        return res
+            .status(200)
+            .json(new ApiResponse(200, "", "Order status updated successfully"));
+    } catch (error) {
+        console.log("updateStatus error", error);
+        return res
+            .status(401)
+            .json(new ApiError(401, "", "Failed to update order status"));
+    }
 }
 
 export { placeOrder, verifyOrder, userOrders, listOrders, updateStatus }
