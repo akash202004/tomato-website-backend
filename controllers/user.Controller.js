@@ -7,30 +7,36 @@ import { ApiResponse } from "../utils/ApiResponse.js"
 
 // creaet token
 const createToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET)
+    try {
+        const token = jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        return token;
+    } catch (error) {
+        console.error("Error creating token:", error);
+        throw new Error("Token creation failed");
+    }
 }
 
-// login user
+// register user
 const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
     try {
         const exists = await userModel.findOne({ email });
         if (exists) {
             return res
-                .status(401)
-                .json(new ApiError(401, "", "User already exists"))
+                .status(400)
+                .json(new ApiError(400, "", "User already exists"))
         }
 
         if (!validator.isEmail(email)) {
             return res
-                .status(401)
-                .json(new ApiError(401, "", "Please enter a valid Email"))
+                .status(400)
+                .json(new ApiError(400, "", "Please enter a valid Email"))
         }
 
         if (password.length < 8) {
             return res
-                .status(401)
-                .json(new ApiError(401, "", "Please enter a strong Password"))
+                .status(400)
+                .json(new ApiError(400, "", "Please enter a strong Password"))
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -57,7 +63,7 @@ const registerUser = async (req, res) => {
     }
 }
 
-// register user
+// login user
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
     try {
